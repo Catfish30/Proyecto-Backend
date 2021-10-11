@@ -86,7 +86,7 @@ class CalificacionesModel(models.Model):
 
     calificacionTipo = models.IntegerField(choices=tipo_nota,db_column='tipo', null=False)
 
-    calificacionNota = models.DecimalField(max_digits=2,decimal_places=2,db_column='nota',null=False)
+    calificacionNota = models.DecimalField(max_digits=4,decimal_places=2,db_column='nota',null=False)
 
     curso = models.ForeignKey(to=CursoModel, db_column='curso_id', on_delete=models.PROTECT, related_name='cursoCalificacion', null=False)
 

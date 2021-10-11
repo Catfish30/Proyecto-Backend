@@ -1,11 +1,11 @@
 from logging import error
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from sistema.models import CursoModel
-from .serializers import RegistroSerializer, CursoSerializer
+from sistema.models import CalificacionesModel, CursoModel
+from .serializers import CalificacionesSeriealizer, RegistroSerializer, CursoSerializer
 
 class RegistroController(CreateAPIView):
     
@@ -32,7 +32,7 @@ class UsuarioController(CreateAPIView):
 class CursosController(ListCreateAPIView):
 
     serializer_class = CursoSerializer
-    queryset = CursoModel.objects.all()
+    queryset = CursoModel.objects.all().order_by('docente')
 
     def post(self, request: Request):
         data = self.serializer_class(data=request.data)
@@ -112,6 +112,66 @@ class CursoController(RetrieveUpdateDestroyAPIView):
         })
 
 
+class BuscadorCursoController(RetrieveAPIView):
+    
+    serializer_class = CursoSerializer
 
-class CalificacionController(CreateAPIView):
-    pass
+    def get(self,request: Request):
+        
+        
+        semestre = request.query_params.get('semestre')
+        # docente = request.query_params.get('docente')
+
+        if semestre:
+            cursosEncontrado = CursoModel.objects.filter(cursoSemestre__contains = semestre).all()
+
+            data =  self.serializer_class(instance=cursosEncontrado, many=True)
+
+            return Response({
+                'content':data.data
+            })
+    
+        # if docente:
+        #     cursosEncontrado = CursoModel.objects.filter(docente__contains = docente).all()
+        #     print(cursosEncontrado)
+        #     data =  self.serializer_class(instance=cursosEncontrado, many=True)
+        #     print(data)
+        #     return Response({
+        #         'content':data.data
+        #     })
+        
+
+class CalificacionesController(CreateAPIView):
+    serializer_class = CalificacionesSeriealizer
+    queryset = CalificacionesModel.objects.all()
+
+    def post(self, request: Request):
+        data = self.serializer_class(data=request.data)
+        if data.is_valid():
+            data.save()
+            return Response(data={
+                'message':'Nota creado exitosamente',
+                'content':data.data
+            },status=status.HTTP_201_CREATED)
+        else:
+            return Response(data={
+                'message':'Error al crear nota',
+                'content':data.errors
+            },status=status.HTTP_400_BAD_REQUEST)
+
+class BuscadorCalificacionController(RetrieveAPIView):
+    
+    serializer_class = CalificacionesSeriealizer
+
+    def get(self,request: Request):
+        
+        cursob = request.query_params.get('curso')
+
+        if cursob:
+            calificacionesEncontradas = CursoModel.objects.filter(cursoCalificacion__cursoId__contains = cursob).all()
+            print(calificacionesEncontradas)
+            data =  self.serializer_class(instance=calificacionesEncontradas, many=True)
+
+            return Response({
+                'content':data.data
+            })

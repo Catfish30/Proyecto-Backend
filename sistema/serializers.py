@@ -1,7 +1,7 @@
 from django.db.models import fields
 from django.db.models.base import Model
 from rest_framework import serializers
-from .models import UsuarioModel, CursoModel
+from .models import CalificacionesModel, UsuarioModel, CursoModel
 
 class RegistroSerializer(serializers.ModelSerializer):
 
@@ -36,4 +36,12 @@ class CursoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CursoModel
+        fields = '__all__'
+        # depth = 1
+        
+
+class CalificacionesSeriealizer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CalificacionesModel
         fields = '__all__'
