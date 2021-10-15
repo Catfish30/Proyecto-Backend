@@ -1,3 +1,8 @@
-from django.contrib import admin
+# from django.contrib import admin
+# from .models import CalificacionesModel
+# from django.contrib.admin import ModelAdmin
 
-# Register your models here.
+
+# @admin.register(CalificacionesModel)
+# class CalificacionesModelAdmin(ModelAdmin):
+#     search_fields = ['curso__cursoId']

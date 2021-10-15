@@ -161,16 +161,16 @@ class CalificacionesController(CreateAPIView):
 
 class BuscadorCalificacionController(RetrieveAPIView):
     
-    serializer_class = CalificacionesSeriealizer
+    serializer_class = CursoSerializer
 
     def get(self,request: Request):
         
-        cursob = request.query_params.get('curso')
+        curso = request.query_params.get('curso')
 
-        if cursob:
-            calificacionesEncontradas = CursoModel.objects.filter(cursoCalificacion__cursoId__contains = cursob).all()
+        if curso:
+            calificacionesEncontradas = CursoModel.objects.filter(cursoId = curso).first()
             print(calificacionesEncontradas)
-            data =  self.serializer_class(instance=calificacionesEncontradas, many=True)
+            data =  self.serializer_class(instance=calificacionesEncontradas)
 
             return Response({
                 'content':data.data

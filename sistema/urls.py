@@ -14,5 +14,5 @@ urlpatterns = [
 
     path('calificaciones', CalificacionesController.as_view()),
     path('buscar-calificacion',BuscadorCalificacionController.as_view()),
-    # path('calificacion/<int:id>')
+
 ]

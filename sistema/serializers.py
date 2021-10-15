@@ -32,12 +32,6 @@ class RegistroSerializer(serializers.ModelSerializer):
             }
         }
 
-class CursoSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CursoModel
-        fields = '__all__'
-        # depth = 1
         
 
 class CalificacionesSeriealizer(serializers.ModelSerializer):
@@ -45,3 +39,10 @@ class CalificacionesSeriealizer(serializers.ModelSerializer):
     class Meta:
         model = CalificacionesModel
         fields = '__all__'
+
+class CursoSerializer(serializers.ModelSerializer):
+    cursoCalificacion = CalificacionesSeriealizer(many=True)
+    class Meta:
+        model = CursoModel
+        fields = '__all__'
+        # depth = 1

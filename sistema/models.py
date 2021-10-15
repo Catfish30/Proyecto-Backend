@@ -2,7 +2,6 @@ from django import db
 from django.db import models
 from django.contrib.auth.models import BaseUserManager,PermissionsMixin,AbstractBaseUser
 
-
 class ManejoUsuario(BaseUserManager):
 
     def create_user(self,correo,nombre,apellido,tipo,password):
