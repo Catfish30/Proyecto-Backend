@@ -5,6 +5,7 @@ from os import environ
 from dotenv import load_dotenv
 load_dotenv()
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -147,3 +148,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = ["DELETE","GET","OPTIONS","PATCH","POST","PUT"]
 
 CORS_ALLOW_HEADERS = ['Content-Type','origin','Authorization']
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
