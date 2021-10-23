@@ -135,3 +135,7 @@ SIMPLE_JWT = {
     'USER_ID_FIELD':'usuarioId',
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=45)
 }
+
+MEDIA_ROOT = BASE_DIR / 'fotos'
+
+MEDIA_URL = '/assets/'

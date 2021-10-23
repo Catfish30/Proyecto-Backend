@@ -1,7 +1,12 @@
+from django.db import models
 from django.db.models import fields
 from django.db.models.base import Model
 from rest_framework import serializers
-from .models import CalificacionesModel, UsuarioModel, CursoModel
+from .models import CalificacionesModel, UsuarioModel, CursoModel, AlumnosModel
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.conf import settings
 
 class RegistroSerializer(serializers.ModelSerializer):
 
@@ -39,10 +44,66 @@ class CalificacionesSeriealizer(serializers.ModelSerializer):
     class Meta:
         model = CalificacionesModel
         fields = '__all__'
+        # exclude=['password']
+
+class CalificacionesSeriealizer0(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CalificacionesModel
+        fields = ['usuario']
+        # exclude=['password']
+
+class CursoSerializer0(serializers.ModelSerializer):
+
+    class Meta:
+        model = CursoModel
+        fields = '__all__'
 
 class CursoSerializer(serializers.ModelSerializer):
+
     cursoCalificacion = CalificacionesSeriealizer(many=True)
+
     class Meta:
         model = CursoModel
         fields = '__all__'
         # depth = 1
+
+class UsuarioSerializer0(serializers.ModelSerializer):
+
+    class Meta:
+        model = UsuarioModel
+        fields = ['usuarioId','usuarioNombre','usuarioApellido','usuarioCorreo','matricula']
+
+class UsuarioSerializer(serializers.ModelSerializer):
+    usuarioCalificacion = CalificacionesSeriealizer(many=True)
+
+    class Meta:
+        model = UsuarioModel
+        # exclude = ['usuaioId']
+        # fields = '__all__'
+        exclude=['password','is_staff','is_active','groups','user_permissions','last_login','is_superuser']
+
+class UsuarioCursoSerializer(serializers.ModelSerializer):
+
+    cursoCalificacion = CalificacionesSeriealizer0(many=True)
+
+    class Meta:
+        model = CursoModel
+        fields='__all__'
+
+class AlumnoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = AlumnosModel
+        fields = '__all__'
+
+class ImagenSerializer(serializers.Serializer):
+    archivo: InMemoryUploadedFile = serializers.ImageField(max_length=30, use_url=True)
+
+    def save(self):
+        archivo = self.validated_data.get('archivo')
+
+        ruta = default_storage.save(archivo.name, ContentFile(archivo.read()))
+
+        return settings.MEDIA_URL + ruta

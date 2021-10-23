@@ -1,6 +1,7 @@
 from django import db
 from django.db import models
 from django.contrib.auth.models import BaseUserManager,PermissionsMixin,AbstractBaseUser
+from django.contrib.postgres.fields import ArrayField
 
 class ManejoUsuario(BaseUserManager):
 
@@ -42,11 +43,17 @@ class UsuarioModel(AbstractBaseUser,PermissionsMixin):
 
     usuarioTipo = models.IntegerField(choices=tipo_usuario,db_column='tipo',verbose_name='Tipo del usuario')
 
-    password = models.TextField(null=False,verbose_name='contraseña del Usuario')
+    password = models.TextField(null=False,verbose_name='Contraseña del Usuario')
+
+    usuarioFoto = models.ImageField(upload_to='usuarios/', db_column='foto', null=True)
+
+    # cursos = ArrayField(ArrayField(models.IntegerField()))
 
     is_staff = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
+
+    matricula = models.BooleanField(default=True)
 
 
     objects = ManejoUsuario()
@@ -68,7 +75,7 @@ class CursoModel(models.Model):
     cursoSemestre=models.IntegerField(db_column='semestre', null=False )
 
     docente= models.ForeignKey(to=UsuarioModel,db_column='usuario_id', on_delete=models.PROTECT, related_name='docenteCurso', null=False)
-
+    
     class Meta:
 
         db_table = 'cursos'
@@ -91,6 +98,18 @@ class CalificacionesModel(models.Model):
 
     usuario = models.ForeignKey(to=UsuarioModel, db_column='usuario_id', on_delete=models.PROTECT, related_name='usuarioCalificacion', null=False)
 
+    # matricula = models.BooleanField(default=True)
+
     class Meta:
 
         db_table = 'calificaciones'
+
+class AlumnosModel(models.Model):
+
+    alumno = models.ForeignKey(to=UsuarioModel, db_column='usuario_id', on_delete=models.PROTECT, related_name='usuarioAlumno', null=False)
+
+    curso = models.ForeignKey(to=CursoModel, db_column='curso_id', on_delete=models.PROTECT, related_name='cursoAlumno', null=False)
+
+    class Meta:
+
+        db_table = 'alumnos'

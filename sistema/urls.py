@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegistroController, CursosController, CursoController, CalificacionesController,BuscadorCursoController, BuscadorCalificacionController
+from .views import RegistroController, CursosController, CursoController, CalificacionesController,BuscadorCursoController, BuscadorCalificacionController, UsuarioController,BuscarUsuariosController, BuscarUsuariosCursoController, AlumnoController, AlumnoCursosController,ImagenController
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -14,5 +14,14 @@ urlpatterns = [
 
     path('calificaciones', CalificacionesController.as_view()),
     path('buscar-calificacion',BuscadorCalificacionController.as_view()),
+
+    path('usuario/<int:id>',UsuarioController.as_view()),
+    path('buscar-usuario',BuscarUsuariosController.as_view()),
+    path('buscar-curso-usuarios',BuscarUsuariosCursoController.as_view()),
+
+    path('registro-alumno',AlumnoController.as_view()),
+    path('buscar-curso-alumno',AlumnoCursosController.as_view()),
+
+    path('subir-imagen', ImagenController.as_view()),
 
 ]

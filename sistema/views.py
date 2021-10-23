@@ -1,11 +1,13 @@
+from functools import partial
 from logging import error
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView
+from django.utils.translation import check_for_language
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 
-from sistema.models import CalificacionesModel, CursoModel
-from .serializers import CalificacionesSeriealizer, RegistroSerializer, CursoSerializer
+from sistema.models import AlumnosModel, CalificacionesModel, CursoModel, UsuarioModel
+from .serializers import CalificacionesSeriealizer, ImagenSerializer, RegistroSerializer, CursoSerializer, UsuarioSerializer, CursoSerializer0,UsuarioSerializer0, UsuarioCursoSerializer,AlumnoSerializer
 
 class RegistroController(CreateAPIView):
     
@@ -26,12 +28,66 @@ class RegistroController(CreateAPIView):
                 'content': data.errors
             })
 
-class UsuarioController(CreateAPIView):
-    pass
+class UsuarioController(RetrieveUpdateDestroyAPIView):
+
+    serializer_class = UsuarioSerializer
+    queryset = UsuarioModel.objects.all()
+
+    def patch(self,request,id):
+        usuarioEncontrado = self.get_queryset().filter(usuarioId=id).first()
+
+        if not usuarioEncontrado:
+            return Response(data={
+                'message':'Usuario no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        serializador = UsuarioSerializer(UsuarioModel,data=request.data,partial=True)
+        if serializador.is_valid():
+            serializador.update(instance=usuarioEncontrado, validated_data=serializador.validated_data)
+
+            return Response(data={
+                'message':'Usuario actualizado exitosamente',
+                'content': serializador.validated_data
+            },status=status.HTTP_200_OK)
+        else:
+            return Response(data={
+                'message':'Error al actualizar el usuario',
+                'content':serializador.errors
+            },status=status.HTTP_400_BAD_REQUEST)
+    
+    def get(self,request,id):
+        usuarioEncontrado = self.get_queryset().filter(usuarioId=id).first()
+
+        if not usuarioEncontrado:
+            return Response(data={
+                'message':'Usuario no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        data = self.serializer_class(instance=usuarioEncontrado)
+
+        return Response(data={
+            'content': data.data
+        },status=status.HTTP_200_OK)
+
+    def delete(self,request,id):
+
+        usuarioEncontrado = self.get_queryset().filter(usuarioId=id).first()
+
+        if not usuarioEncontrado:
+            return Response(data={
+                'message': 'Usuario no encontrado'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        data = CursoModel.objects.filter(usuarioId=id).delete()
+  
+        return Response(data={
+            'message': 'Usuario eliminado exitosamente'
+        })
+
 
 class CursosController(ListCreateAPIView):
 
-    serializer_class = CursoSerializer
+    serializer_class = CursoSerializer0
     queryset = CursoModel.objects.all().order_by('docente')
 
     def post(self, request: Request):
@@ -54,6 +110,8 @@ class CursosController(ListCreateAPIView):
                 "message":None,
                 "content":data.data
             })
+
+    
 
 class CursoController(RetrieveUpdateDestroyAPIView):
 
@@ -120,7 +178,7 @@ class BuscadorCursoController(RetrieveAPIView):
         
         
         semestre = request.query_params.get('semestre')
-        # docente = request.query_params.get('docente')
+        curso = request.query_params.get('docente')
 
         if semestre:
             cursosEncontrado = CursoModel.objects.filter(cursoSemestre__contains = semestre).all()
@@ -131,11 +189,11 @@ class BuscadorCursoController(RetrieveAPIView):
                 'content':data.data
             })
     
-        # if docente:
-        #     cursosEncontrado = CursoModel.objects.filter(docente__contains = docente).all()
-        #     print(cursosEncontrado)
-        #     data =  self.serializer_class(instance=cursosEncontrado, many=True)
-        #     print(data)
+        # if curso:
+        #     cursosEncontrado = CursoModel.objects.filter(cursoId = curso).first()
+            
+        #     data =  self.serializer_class_usuario(instance=cursosEncontrado)
+            
         #     return Response({
         #         'content':data.data
         #     })
@@ -145,33 +203,153 @@ class CalificacionesController(CreateAPIView):
     serializer_class = CalificacionesSeriealizer
     queryset = CalificacionesModel.objects.all()
 
+    queryset_u = UsuarioModel.objects.all()
+
+    
+
     def post(self, request: Request):
         data = self.serializer_class(data=request.data)
+
+        
         if data.is_valid():
-            data.save()
-            return Response(data={
-                'message':'Nota creado exitosamente',
-                'content':data.data
-            },status=status.HTTP_201_CREATED)
-        else:
-            return Response(data={
-                'message':'Error al crear nota',
-                'content':data.errors
-            },status=status.HTTP_400_BAD_REQUEST)
+
+            usuario = data.data.get('usuario')
+            usuarioEncontrado = UsuarioModel.objects.filter(usuarioId = usuario)
+            estado = usuarioEncontrado.values_list('matricula', flat=False).get()
+            
+            if estado == True :             
+                return Response(data={
+                    'message':'Nota creada exitosamente',
+                    'content':data.data
+                },status=status.HTTP_201_CREATED)
+                
+            else:
+                return Response(data={
+                    'message':'Alumno no matriculado',
+                    'content':data.errors
+                },status=status.HTTP_400_BAD_REQUEST)
 
 class BuscadorCalificacionController(RetrieveAPIView):
     
-    serializer_class = CursoSerializer
+    serializer_class_curso = CursoSerializer
+    serializer_class_usuario = UsuarioSerializer
 
     def get(self,request: Request):
         
         curso = request.query_params.get('curso')
 
+        usuario = request.query_params.get('usuario')
+
         if curso:
             calificacionesEncontradas = CursoModel.objects.filter(cursoId = curso).first()
-            print(calificacionesEncontradas)
-            data =  self.serializer_class(instance=calificacionesEncontradas)
+            data =  self.serializer_class_curso(instance=calificacionesEncontradas)
 
             return Response({
                 'content':data.data
             })
+
+        if usuario:
+            calificacionesEncontradas = UsuarioModel.objects.filter(usuarioId = usuario).first()
+            data =  self.serializer_class_usuario(instance=calificacionesEncontradas)
+
+            return Response({
+                'content':data.data
+            })
+
+class BuscarUsuariosController(RetrieveAPIView):
+
+    serializer_class = UsuarioSerializer0
+
+    def get(self,request: Request):
+
+        matricula = request.query_params.get('matricula')
+
+        if matricula:
+            usuariosEncontrados = UsuarioModel.objects.filter(matricula = matricula).all()
+            data = self.serializer_class(instance=usuariosEncontrados, many=True)
+            print(data)
+            return Response({
+                'content':data.data
+            })
+
+class BuscarUsuariosCursoController(RetrieveAPIView):
+
+    serializer_class = UsuarioCursoSerializer
+
+    def get(self,request: Request):
+
+        curso = request.query_params.get('curso')
+
+        if curso:
+            cursosEcontrados = CursoModel.objects.filter(cursoId = curso).first()
+            data = self.serializer_class(instance=cursosEcontrados)
+            print(data)
+            return Response({
+                'content':data.data
+            })
+
+class AlumnoController(CreateAPIView):
+
+    serializer_class = AlumnoSerializer
+
+    def post(self, request: Request):
+        data = self.serializer_class(data=request.data)
+        if data.is_valid():
+            data.save()
+            return Response(data={
+                'message':'Alumno registrado exitosamente',
+                'content':data.data
+            },status=status.HTTP_201_CREATED)
+        else:
+            return Response(data={
+                'message':'Error al regsitrar alumno',
+                'content':data.errors
+            },status=status.HTTP_400_BAD_REQUEST)
+
+class AlumnoCursosController(RetrieveAPIView):
+    
+    serializer_class = AlumnoSerializer
+
+    def get(self,request: Request):
+        
+        curso = request.query_params.get('curso')
+
+        alumno = request.query_params.get('alumno')
+
+        if curso:
+            alumnosEncontrado = AlumnosModel.objects.filter(curso = curso).all()
+
+            data =  self.serializer_class(instance=alumnosEncontrado, many=True)
+
+            return Response({
+                'content':data.data
+            })
+
+        if alumno:
+            cursosEncontrado = AlumnosModel.objects.filter(alumno = alumno).all()
+
+            data =  self.serializer_class(instance=cursosEncontrado, many=True)
+
+            return Response({
+                'content':data.data
+            })
+
+class ImagenController(CreateAPIView):
+    serializer_class = ImagenSerializer
+
+    def post(self, request:Request):
+
+        data = self.serializer_class(data= request.FILES)
+
+        if data.is_valid():
+            archivo = data.save()
+            url = request.META.get('HTTP_HOST')
+            return Response(data={
+                'message':'Archivo subido exitosamente',
+                'content':url + archivo
+            },status=status.HTTP_201_CREATED)
+        else:
+            return Response(data={
+                'message':'Error al subir archivo',
+                'content':data.errors
+            },status=status.HTTP_400_BAD_REQUEST)
