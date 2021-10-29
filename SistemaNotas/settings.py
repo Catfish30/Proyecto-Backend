@@ -19,7 +19,7 @@ SECRET_KEY = 'django-insecure-@ok&6!gevk3^p)a0kr^fiv=jk3g0k!#8@yt&l*o!8j#leq+y6)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['proyecto-g9-sistema.herokuapp.com']
+ALLOWED_HOSTS = ['proyecto-g9-sistema.herokuapp.com','127.0.0.1']
 
 
 # Application definition
@@ -34,11 +34,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'sistema',
     'corsheaders',
+    # 'rest_framework_swagger',
+    # 'drf_yasg',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -132,7 +135,8 @@ AUTH_USER_MODEL = 'sistema.UsuarioModel'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
+    ],
+    # 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
 
 SIMPLE_JWT = {
@@ -140,9 +144,9 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=45)
 }
 
-MEDIA_ROOT = BASE_DIR / 'fotos'
-
 MEDIA_URL = '/assets/'
+
+DEFAULT_FILE_STORAGE= "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -151,3 +155,9 @@ CORS_ALLOW_METHODS = ["DELETE","GET","OPTIONS","PATCH","POST","PUT"]
 CORS_ALLOW_HEADERS = ['Content-Type','origin','Authorization']
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': environ.get('CLOUDINARY_API_SECRET')
+}

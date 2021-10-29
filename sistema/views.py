@@ -5,6 +5,8 @@ from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveAP
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from cloudinary.uploader import upload
 
 from sistema.models import AlumnosModel, CalificacionesModel, CursoModel, UsuarioModel
 from .serializers import CalificacionesSeriealizer, ImagenSerializer, RegistroSerializer, CursoSerializer, UsuarioSerializer, CursoSerializer0,UsuarioSerializer0, UsuarioCursoSerializer,AlumnoSerializer
@@ -32,6 +34,8 @@ class UsuarioController(RetrieveUpdateDestroyAPIView):
 
     serializer_class = UsuarioSerializer
     queryset = UsuarioModel.objects.all()
+
+    permission_classes = (IsAuthenticated,)
 
     def patch(self,request,id):
         usuarioEncontrado = self.get_queryset().filter(usuarioId=id).first()
@@ -78,7 +82,7 @@ class UsuarioController(RetrieveUpdateDestroyAPIView):
                 'message': 'Usuario no encontrado'
             }, status=status.HTTP_404_NOT_FOUND)
 
-        data = CursoModel.objects.filter(usuarioId=id).delete()
+        data = UsuarioModel.objects.filter(usuarioId=id).delete()
   
         return Response(data={
             'message': 'Usuario eliminado exitosamente'
@@ -89,6 +93,8 @@ class CursosController(ListCreateAPIView):
 
     serializer_class = CursoSerializer0
     queryset = CursoModel.objects.all().order_by('docente')
+
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request: Request):
         data = self.serializer_class(data=request.data)
@@ -117,6 +123,8 @@ class CursoController(RetrieveUpdateDestroyAPIView):
 
     serializer_class = CursoSerializer
     queryset = CursoModel.objects.all()
+
+    permission_classes = (IsAuthenticated,)
 
     def put(self,request,id):
         cursoEncontrado = self.get_queryset().filter(cursoId=id).first()
@@ -205,6 +213,8 @@ class CalificacionesController(CreateAPIView):
 
     queryset_u = UsuarioModel.objects.all()
 
+    permission_classes = (IsAuthenticated,)
+
     
 
     def post(self, request: Request):
@@ -215,9 +225,9 @@ class CalificacionesController(CreateAPIView):
 
             usuario = data.data.get('usuario')
             usuarioEncontrado = UsuarioModel.objects.filter(usuarioId = usuario)
-            estado = usuarioEncontrado.values_list('matricula', flat=False).get()
+            estado = usuarioEncontrado.values_list('matricula', flat=True).get()
             
-            if estado == True :             
+            if estado == False :             
                 return Response(data={
                     'message':'Nota creada exitosamente',
                     'content':data.data
@@ -335,21 +345,20 @@ class AlumnoCursosController(RetrieveAPIView):
             })
 
 class ImagenController(CreateAPIView):
-    serializer_class = ImagenSerializer
+    # serializer_class = ImagenSerializer
 
     def post(self, request:Request):
 
-        data = self.serializer_class(data= request.FILES)
+        imagen = request.FILES.get('archivo')
+        resultado = upload(imagen)
+        url = resultado.get('secure_url')
 
-        if data.is_valid():
-            archivo = data.save()
-            url = request.META.get('HTTP_HOST')
+        if imagen:
             return Response(data={
                 'message':'Archivo subido exitosamente',
-                'content':url + archivo
+                'content':url
             },status=status.HTTP_201_CREATED)
         else:
             return Response(data={
-                'message':'Error al subir archivo',
-                'content':data.errors
-            },status=status.HTTP_400_BAD_REQUEST)
+                'message':'Error al subir archivo'
+            })

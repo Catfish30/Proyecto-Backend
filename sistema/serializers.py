@@ -10,6 +10,7 @@ from django.conf import settings
 
 class RegistroSerializer(serializers.ModelSerializer):
 
+    usuarioFoto = serializers.CharField(max_length=250)
     
     def save(self):
 
@@ -17,8 +18,9 @@ class RegistroSerializer(serializers.ModelSerializer):
         usuarioApellido = self.validated_data.get('usuarioApellido')
         usuarioTipo = self.validated_data.get('usuarioTipo')
         usuarioCorreo = self.validated_data.get('usuarioCorreo')
+        usuarioFoto = self.validated_data.get('usuarioFoto')
         password = self.validated_data.get('password')
-        nuevoUsuario = UsuarioModel(usuarioNombre=usuarioNombre,usuarioApellido=usuarioApellido,usuarioTipo=usuarioTipo,usuarioCorreo=usuarioCorreo)
+        nuevoUsuario = UsuarioModel(usuarioNombre=usuarioNombre,usuarioApellido=usuarioApellido,usuarioTipo=usuarioTipo,usuarioCorreo=usuarioCorreo,usuarioFoto=usuarioFoto)
 
         nuevoUsuario.set_password(password)
         nuevoUsuario.save()
@@ -99,11 +101,5 @@ class AlumnoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ImagenSerializer(serializers.Serializer):
-    archivo: InMemoryUploadedFile = serializers.ImageField(max_length=30, use_url=True)
 
-    def save(self):
-        archivo = self.validated_data.get('archivo')
-
-        ruta = default_storage.save(archivo.name, ContentFile(archivo.read()))
-
-        return settings.MEDIA_URL + ruta
+    archivo: InMemoryUploadedFile = serializers.ImageField(max_length=250, use_url=True)
