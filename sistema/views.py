@@ -345,7 +345,8 @@ class AlumnoCursosController(RetrieveAPIView):
             })
 
 class ImagenController(CreateAPIView):
-    # serializer_class = ImagenSerializer
+    
+    serializer_class = ImagenSerializer
 
     def post(self, request:Request):
 
