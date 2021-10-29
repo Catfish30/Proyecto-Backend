@@ -94,7 +94,7 @@ class CursosController(ListCreateAPIView):
     serializer_class = CursoSerializer0
     queryset = CursoModel.objects.all().order_by('docente')
 
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     def post(self, request: Request):
         data = self.serializer_class(data=request.data)
@@ -124,7 +124,7 @@ class CursoController(RetrieveUpdateDestroyAPIView):
     serializer_class = CursoSerializer
     queryset = CursoModel.objects.all()
 
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     def put(self,request,id):
         cursoEncontrado = self.get_queryset().filter(cursoId=id).first()
@@ -213,7 +213,7 @@ class CalificacionesController(CreateAPIView):
 
     queryset_u = UsuarioModel.objects.all()
 
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     
 
