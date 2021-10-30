@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from cloudinary.uploader import upload
 
 from sistema.models import AlumnosModel, CalificacionesModel, CursoModel, UsuarioModel
-from .serializers import CalificacionesSeriealizer, ImagenSerializer, RegistroSerializer, CursoSerializer, UsuarioSerializer, CursoSerializer0,UsuarioSerializer0, UsuarioCursoSerializer,AlumnoSerializer
+from .serializers import CalificacionesSeriealizer, ImagenSerializer, RegistroSerializer, CursoSerializer, UsuarioSerializer, CursoSerializer0,UsuarioSerializer0, UsuarioCursoSerializer,AlumnoSerializer,CursoSerializer01
 
 class RegistroController(CreateAPIView):
     
@@ -92,6 +92,7 @@ class UsuarioController(RetrieveUpdateDestroyAPIView):
 class CursosController(ListCreateAPIView):
 
     serializer_class = CursoSerializer0
+    serializer_class01 =CursoSerializer01
     queryset = CursoModel.objects.all().order_by('docente')
 
     # permission_classes = (IsAuthenticated,)
@@ -111,7 +112,7 @@ class CursosController(ListCreateAPIView):
             },status=status.HTTP_400_BAD_REQUEST)
     
     def get(self,request):
-        data = self.serializer_class(instance=self.get_queryset(),many=True)
+        data = self.serializer_class01(instance=self.get_queryset(),many=True)
         return Response(data={
                 "message":None,
                 "content":data.data

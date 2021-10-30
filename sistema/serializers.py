@@ -60,7 +60,14 @@ class CursoSerializer0(serializers.ModelSerializer):
     class Meta:
         model = CursoModel
         fields = '__all__'
+        # depth = 1
+class CursoSerializer01(serializers.ModelSerializer):
 
+    class Meta:
+        model = CursoModel
+        fields = '__all__'
+        depth = 1
+ 
 class CursoSerializer(serializers.ModelSerializer):
 
     cursoCalificacion = CalificacionesSeriealizer(many=True)
@@ -68,7 +75,7 @@ class CursoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CursoModel
         fields = '__all__'
-        # depth = 1
+        # depth = 2
 
 class UsuarioSerializer0(serializers.ModelSerializer):
 
